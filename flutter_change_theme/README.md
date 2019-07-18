@@ -1,6 +1,10 @@
 # flutter_change_theme
 
-Flutter change theme | BLoC + RxDart + RxSharedPrefs - Youtube code https://youtu.be/ZQyi_LQymrI
+## Flutter change theme | BLoC + RxDart + RxSharedPrefs
+
+[Video](https://youtu.be/ZQyi_LQymrI)
+
+![Screenshot](./Screenshot.gif)
 
 ## Getting Started
 

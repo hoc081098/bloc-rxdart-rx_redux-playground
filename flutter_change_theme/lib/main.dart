@@ -1,134 +1,44 @@
-import 'dart:async';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
+import 'package:flutter_change_theme/generated/i18n.dart';
+import 'package:flutter_change_theme/theme_locale_bloc.dart';
+import 'package:flutter_change_theme/theme_model.dart';
+import 'package:flutter_change_theme/theme_locale_provider.dart';
 import 'package:flutter_provider/flutter_provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:rx_shared_preference/rx_shared_preference.dart';
-import 'package:distinct_value_connectable_observable/distinct_value_connectable_observable.dart';
-import 'package:tuple/tuple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-const themeKey = 'com.hoc.flutter_change_theme.theme';
+import 'package:tuple/tuple.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
-  final themesProvider = ThemesProvider();
+  print("Running...");
+
+  // Dependencies
+  final themesProvider = ThemesLocalesProvider();
   final rxSharedPrefs = RxSharedPreferences(SharedPreferences.getInstance());
-  final themeBloc = ThemeBloc(themesProvider, rxSharedPrefs);
+  final themeLocaleBloc = ThemeLocaleBloc(themesProvider, rxSharedPrefs);
 
   runApp(
-    Provider<ThemesProvider>(
+    Provider<ThemesLocalesProvider>(
       value: themesProvider,
-      child: BlocProvider<ThemeBloc>(
+      child: BlocProvider<ThemeLocaleBloc>(
         child: MyApp(),
-        initBloc: () => themeBloc,
+        initBloc: () => themeLocaleBloc,
       ),
     ),
   );
 }
 
-class ThemeModel {
-  final ThemeData themeData;
-  final String themeTitle;
-
-  const ThemeModel(this.themeData, this.themeTitle);
-
-  @override
-  String toString() => 'ThemeModel(themeTitle=$themeTitle)';
-}
-
-class ThemesProvider {
-  final List<ThemeModel> themes;
-  final ThemeModel Function(String) findThemeByTitle;
-
-  ThemesProvider._(this.themes, this.findThemeByTitle);
-
-  factory ThemesProvider() {
-    final themes = <ThemeModel>[
-      ThemeModel(ThemeData.dark(), 'Dark theme'),
-      ThemeModel(ThemeData.light(), 'Light theme'),
-    ];
-    return ThemesProvider._(
-      themes,
-      (title) => themes.firstWhere((theme) => theme.themeTitle == title),
-    );
-  }
-}
-
-class ThemeBloc implements BaseBloc {
-  final Future<bool> Function(ThemeModel) changeTheme;
-  final ValueObservable<ThemeModel> theme$;
-  final void Function() _dispose;
-
-  ThemeBloc._(
-    this.changeTheme,
-    this.theme$,
-    this._dispose,
-  );
-
-  @override
-  void dispose() => _dispose();
-
-  factory ThemeBloc(
-    ThemesProvider themesProvider,
-    RxSharedPreferences rxSharedPrefs,
-  ) {
-    final changeThemeSubject =
-        PublishSubject<Tuple2<Completer<bool>, ThemeModel>>();
-
-    final theme$ = rxSharedPrefs.getStringObservable(themeKey).map((title) {
-      return title != null
-          ? themesProvider.findThemeByTitle(title)
-          : themesProvider.themes[0];
-    });
-
-    final themeEquals = (ThemeModel prev, ThemeModel next) =>
-        prev?.themeTitle == next?.themeTitle;
-
-    final themeDistinct$ = publishValueDistinct<ThemeModel>(
-      theme$,
-      equals: themeEquals,
-    );
-
-    changeTheme(Tuple2<Completer<bool>, ThemeModel> tuple2) async* {
-      final result =
-          await rxSharedPrefs.setString(themeKey, tuple2.item2.themeTitle);
-      tuple2.item1.complete(result);
-      yield result;
-    }
-
-    final subscriptions = [
-      changeThemeSubject
-          .distinct((prev, next) => themeEquals(prev.item2, next.item2))
-          .switchMap(changeTheme)
-          .listen((result) => print('[CHANGE_THEME] $result')),
-      themeDistinct$.listen((theme) => print('[THEME] $theme')),
-      themeDistinct$.connect(),
-    ];
-
-    return ThemeBloc._(
-      (theme) {
-        final completer = Completer<bool>();
-        changeThemeSubject.add(Tuple2(completer, theme));
-        return completer.future;
-      },
-      themeDistinct$,
-      () async {
-        await Future.wait(subscriptions.map((s) => s.cancel()));
-        await changeThemeSubject.close();
-      },
-    );
-  }
-}
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final bloc = BlocProvider.of<ThemeBloc>(context);
+    final bloc = BlocProvider.of<ThemeLocaleBloc>(context);
 
-    return StreamBuilder<ThemeModel>(
-      stream: bloc.theme$,
-      initialData: bloc.theme$.value,
+    return StreamBuilder<Tuple2<ThemeModel, Locale>>(
+      stream: bloc.themeAndLocale$,
+      initialData: bloc.themeAndLocale$.value,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container(
@@ -136,9 +46,21 @@ class MyApp extends StatelessWidget {
             height: double.infinity,
           );
         }
+
+        final enLocale = Provider.of<ThemesLocalesProvider>(context)
+            .findLocaleByLanguageCode('en');
+
         return MaterialApp(
           title: 'Flutter change theme',
-          theme: snapshot.data.themeData,
+          theme: snapshot.data.item1.themeData,
+          locale: snapshot.data.item2,
+          supportedLocales: S.delegate.supportedLocales,
+          localeResolutionCallback: S.delegate.resolution(fallback: enLocale),
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
           home: const MyHomePage(),
         );
       },
@@ -148,64 +70,194 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key key}) : super(key: key);
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  @override
+  Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<ThemeLocaleBloc>(context);
+    final s = S.of(context);
+    final provider = Provider.of<ThemesLocalesProvider>(context);
 
-  void _incrementCounter() {
-    setState(() => _counter++);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home page'),
+      ),
+      body: StreamBuilder<Tuple2<ThemeModel, Locale>>(
+        stream: bloc.themeAndLocale$,
+        initialData: bloc.themeAndLocale$.value,
+        builder: (context, snapshot) {
+          final data = snapshot.data;
+          final theme = data.item1;
+          final locale = data.item2;
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Theme.of(context).canvasColor,
+                    boxShadow: [
+                      BoxShadow(
+                        offset: Offset(0, 8),
+                        blurRadius: 16,
+                        spreadRadius: 0,
+                        color: Theme.of(context).backgroundColor,
+                      )
+                    ]),
+                child: Column(
+                  children: <Widget>[
+                    Center(
+                      child: LocalePopupMenu(
+                        locale: locale,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Center(
+                      child: ThemePopupMenu(
+                        themeModel: theme,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Theme.of(context).canvasColor,
+                    boxShadow: [
+                      BoxShadow(
+                        offset: Offset(0, 8),
+                        blurRadius: 16,
+                        spreadRadius: 0,
+                        color: Theme.of(context).backgroundColor,
+                      )
+                    ]),
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      s.current_theme_is(
+                        theme.themeTitle(s),
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.title.copyWith(fontSize: 15),
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      s.current_language_is(
+                        provider.getLanguageNameStringByLanguageCode(
+                          locale.languageCode,
+                        ),
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.title.copyWith(fontSize: 15),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
+}
+
+class ThemePopupMenu extends StatelessWidget {
+  const ThemePopupMenu({
+    Key key,
+    @required this.themeModel,
+  }) : super(key: key);
+
+  final ThemeModel themeModel;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-      ),
-      body: Center(
-        child: Column(
+    final bloc = BlocProvider.of<ThemeLocaleBloc>(context);
+    final s = S.of(context);
+    final provider = Provider.of<ThemesLocalesProvider>(context);
+
+    return PopupMenuButton<ThemeModel>(
+      initialValue: themeModel,
+      onSelected: bloc.changeTheme,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+              themeModel.themeTitle(s),
+              style: Theme.of(context).textTheme.title,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-            Consumer<ThemesProvider>(
-              builder: (BuildContext context, ThemesProvider t) {
-                final bloc = BlocProvider.of<ThemeBloc>(context);
-
-                return Column(
-                  children: <Widget>[
-                    Text(
-                      t.themes.toString(),
-                      textAlign: TextAlign.center,
-                    ),
-                    FlatButton(
-                      child: Text('Dark theme'),
-                      onPressed: () => bloc.changeTheme(t.themes[0]),
-                    ),
-                    FlatButton(
-                      child: Text('Light theme'),
-                      onPressed: () => bloc.changeTheme(t.themes[1]),
-                    ),
-                  ],
-                );
-              },
-            ),
+            SizedBox(width: 8),
+            Icon(Icons.arrow_drop_down),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+      itemBuilder: (BuildContext context) {
+        return provider.themes.map((theme) {
+          return PopupMenuItem<ThemeModel>(
+            child: Text(theme.themeTitle(s)),
+            value: theme,
+          );
+        }).toList(growable: false);
+      },
+    );
+  }
+}
+
+class LocalePopupMenu extends StatelessWidget {
+  const LocalePopupMenu({
+    Key key,
+    @required this.locale,
+  }) : super(key: key);
+
+  final Locale locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<ThemeLocaleBloc>(context);
+    final provider = Provider.of<ThemesLocalesProvider>(context);
+
+    return PopupMenuButton<Locale>(
+      initialValue: locale,
+      onSelected: bloc.changeLocale,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              provider.getLanguageNameStringByLanguageCode(locale.languageCode),
+              style: Theme.of(context).textTheme.title,
+            ),
+            SizedBox(width: 8),
+            Icon(Icons.arrow_drop_down),
+          ],
+        ),
       ),
+      itemBuilder: (BuildContext context) {
+        return provider.supportedLocales.map((locale) {
+          return PopupMenuItem<Locale>(
+            child: Text(
+              provider.getLanguageNameStringByLanguageCode(locale.languageCode),
+            ),
+            value: locale,
+          );
+        }).toList(growable: false);
+      },
     );
   }
 }

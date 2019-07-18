@@ -1,0 +1,9 @@
+{
+  "dark_theme": "Chủ đề tối",
+  "light_theme": "Chủ đề sáng",
+  "current_theme_is": "Chủ đề hiện tại là $themeTitle",
+  "current_language_is": "Ngôn ngữ hiện tại là $langName",
+  "change_theme_success": "Đổi chủ đề thành công",
+  "change_theme_failure": "Đổi chủ đề thất bại",
+  "change_theme_failure_cause_by": "Đổi chủ đề thất bại gây ra bởi lỗi: $error"
+}

@@ -1,0 +1,9 @@
+{
+  "dark_theme": "Dark theme",
+  "light_theme": "Light theme",
+  "current_theme_is": "Current theme is $themeTitle",
+  "current_language_is": "Current language is $langName",
+  "change_theme_success": "Change theme successfully",
+  "change_theme_failure": "Change theme failure",
+  "change_theme_failure_cause_by": "Change theme failure cause by error: $error"
+}
