@@ -1,16 +1,13 @@
-# flutter_change_theme
+# bloc_rxdart_playground
 
-A new Flutter project.
+-----------
 
-## Getting Started
+## [fetch_json_bloc_rxdart](/fetch_json_bloc_rxdart)
 
-This project is a starting point for a Flutter application.
+Http + BLoC + RxDart
 
-A few resources to get you started if this is your first Flutter project:
+[Video](https://www.youtube.com/watch?v=SLVujaxMuwM&t=1015s)
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+![Image screenshot](/Screenshot.png)
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+-----------
