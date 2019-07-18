@@ -4,7 +4,7 @@
 
 [Video](https://www.youtube.com/watch?v=SLVujaxMuwM&t=1015s)
 
-![Image screenshot](/Screenshot.png)
+![Image screenshot](./Screenshot.png)
 
 ## Getting Started
 
