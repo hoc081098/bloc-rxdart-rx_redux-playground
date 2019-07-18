@@ -2,7 +2,7 @@
 
 ## Http + BLoC + RxDart
 
-[Video](https://www.youtube.com/watch?v=SLVujaxMuwM&t=1015s)
+[Video](https://youtu.be/SLVujaxMuwM)
 
 ![Image screenshot](./Screenshot.png)
 
