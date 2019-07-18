@@ -2,12 +2,12 @@
 
 -----------
 
-## [fetch_json_bloc_rxdart](/fetch_json_bloc_rxdart)
+## [fetch_json_bloc_rxdart](./fetch_json_bloc_rxdart)
 
 Http + BLoC + RxDart
 
-[Video](https://www.youtube.com/watch?v=SLVujaxMuwM&t=1015s)
+[Video](https://youtu.be/SLVujaxMuwM)
 
-![Image screenshot](/Screenshot.png)
+![Image screenshot](./fetch_json_bloc_rxdart/Screenshot.png)
 
 -----------
