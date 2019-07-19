@@ -55,6 +55,7 @@ class ThemeLocaleBloc implements BaseBloc {
   /// Output
   ///
   final ValueObservable<Tuple2<ThemeModel, Locale>> themeAndLocale$;
+  final Stream<ChangeThemeLocaleMessage> message$;
 
   ///
   /// Dispose
@@ -69,6 +70,7 @@ class ThemeLocaleBloc implements BaseBloc {
     @required this.changeTheme,
     @required this.changeLocale,
     @required this.themeAndLocale$,
+    @required this.message$,
   });
 
   factory ThemeLocaleBloc(
@@ -112,6 +114,8 @@ class ThemeLocaleBloc implements BaseBloc {
     ///
     /// Persist theme and locale to shared pref
     ///
+
+    /// Using stream generator (async*)
     changeTheme(ThemeModel theme) async* {
       try {
         final result = await rxSharedPrefs.setString(
@@ -128,20 +132,18 @@ class ThemeLocaleBloc implements BaseBloc {
       }
     }
 
-    changeLocale(Locale locale) async* {
-      try {
-        final result = await rxSharedPrefs.setString(
-          _localeKey,
-          locale.languageCode,
-        );
-        if (result) {
-          yield const ChangeLocaleSuccess();
-        } else {
-          yield const ChangeLocaleFailure();
-        }
-      } catch (e) {
-        yield ChangeLocaleFailure(e);
-      }
+    /// Using RxDart
+    changeLocale(Locale locale) {
+      return Observable.defer(() => Stream.fromFuture(
+                rxSharedPrefs.setString(
+                  _localeKey,
+                  locale.languageCode,
+                ),
+              ))
+          .map((result) => result
+              ? const ChangeLocaleSuccess()
+              : const ChangeLocaleFailure())
+          .onErrorReturnWith((e) => ChangeLocaleFailure(e));
     }
 
     final message$ = Observable.merge(
@@ -161,8 +163,8 @@ class ThemeLocaleBloc implements BaseBloc {
       message$.listen((message) => print('[THEME_BLOC] message=$message')),
       themeAndLocale$.listen(
         (tuple) => print(
-              '[THEME_BLOC] theme=${tuple.item1.themeId}, locale=${tuple.item2}',
-            ),
+          '[THEME_BLOC] theme=${tuple.item1.themeId}, locale=${tuple.item2}',
+        ),
       ),
 
       ///
@@ -183,6 +185,7 @@ class ThemeLocaleBloc implements BaseBloc {
       changeLocale: changeLocaleSubject.add,
       changeTheme: changeThemeSubject.add,
       themeAndLocale$: themeAndLocale$,
+      message$: message$,
     );
   }
 }

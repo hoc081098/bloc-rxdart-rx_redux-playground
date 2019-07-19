@@ -5,5 +5,8 @@
   "current_language_is": "Current language is $langName",
   "change_theme_success": "Change theme successfully",
   "change_theme_failure": "Change theme failure",
-  "change_theme_failure_cause_by": "Change theme failure cause by error: $error"
+  "change_theme_failure_cause_by": "Change theme failure cause by error: $error",
+  "change_language_success": "Change locale successfully",
+  "change_language_failure": "Change locale failure",
+  "change_language_failure_cause_by": "Change locale failure cause by error: $error"
 }

@@ -28,6 +28,9 @@ class S implements WidgetsLocalizations {
   String change_theme_failure_cause_by(String error) => "Change theme failure cause by error: $error";
   String current_language_is(String langName) => "Current language is $langName";
   String current_theme_is(String themeTitle) => "Current theme is $themeTitle";
+  String get change_language_success=>"Change locale successfully";
+  String get change_language_failure => "Change locale failure";
+  String change_language_failure_cause_by(String error) => "Change locale failure cause by error: $error";
 }
 
 class vi extends S {
@@ -50,6 +53,12 @@ class vi extends S {
   String current_theme_is(String themeTitle) => "Chủ đề hiện tại là $themeTitle";
   @override
   String change_theme_failure_cause_by(String error) => "Đổi chủ đề thất bại gây ra bởi lỗi: $error";
+  @override
+  String get change_language_success=>"Đổi ngôn ngữ thành công";
+  @override
+  String get change_language_failure => "Đổi ngôn ngữ thất bại";
+  @override
+  String change_language_failure_cause_by(String error) => "Đổi ngôn ngữ thất bại gây ra bởi lỗi: $error";
 }
 
 class en extends S {

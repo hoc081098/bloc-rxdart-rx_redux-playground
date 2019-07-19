@@ -5,5 +5,8 @@
   "current_language_is": "Ngôn ngữ hiện tại là $langName",
   "change_theme_success": "Đổi chủ đề thành công",
   "change_theme_failure": "Đổi chủ đề thất bại",
-  "change_theme_failure_cause_by": "Đổi chủ đề thất bại gây ra bởi lỗi: $error"
+  "change_theme_failure_cause_by": "Đổi chủ đề thất bại gây ra bởi lỗi: $error",
+  "change_language_success": "Đổi ngôn ngữ thành công",
+  "change_language_failure": "Đổi ngôn ngữ thất bại",
+  "change_language_failure_cause_by": "Đổi ngôn ngữ thất bại gây ra bởi lỗi: $error"
 }

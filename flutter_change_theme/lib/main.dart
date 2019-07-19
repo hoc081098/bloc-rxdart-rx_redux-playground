@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -76,6 +78,55 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  StreamSubscription<String> _subscription;
+
+  showSnackBar(String message) {
+    _scaffoldKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _subscription ??=
+        BlocProvider.of<ThemeLocaleBloc>(context).message$.map((message) {
+      final s = S.of(context);
+      if (message is ChangeThemeSuccess) {
+        return s.change_theme_success;
+      }
+      if (message is ChangeThemeFailure) {
+        if (message.error != null) {
+          return s.change_theme_failure_cause_by(message.error.toString());
+        } else {
+          return s.change_theme_failure;
+        }
+      }
+      if (message is ChangeLocaleSuccess) {
+        return s.change_language_success;
+      }
+      if (message is ChangeLocaleFailure) {
+        if (message.error != null) {
+          return s.change_language_failure_cause_by(message.error.toString());
+        } else {
+          return s.change_language_failure;
+        }
+      }
+      return null;
+    }).listen(showSnackBar);
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<ThemeLocaleBloc>(context);
@@ -83,6 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final provider = Provider.of<ThemesLocalesProvider>(context);
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Home page'),
       ),
@@ -150,7 +202,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         theme.themeTitle(s),
                       ),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.title.copyWith(fontSize: 15),
+                      style: Theme.of(context)
+                          .textTheme
+                          .title
+                          .copyWith(fontSize: 15),
                     ),
                     SizedBox(height: 12),
                     Text(
@@ -160,7 +215,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.title.copyWith(fontSize: 15),
+                      style: Theme.of(context)
+                          .textTheme
+                          .title
+                          .copyWith(fontSize: 15),
                     ),
                   ],
                 ),
