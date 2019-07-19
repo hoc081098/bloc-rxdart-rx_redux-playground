@@ -14,17 +14,28 @@ import 'package:tuple/tuple.dart';
 ///
 /// Change theme message
 ///
-abstract class ChangeThemeMessage {}
+abstract class ChangeThemeLocaleMessage {}
 
-class ChangeThemeSuccess implements ChangeThemeMessage {
+class ChangeThemeSuccess implements ChangeThemeLocaleMessage {
   const ChangeThemeSuccess();
 }
 
-class ChangeThemeFailure implements ChangeThemeMessage {
+class ChangeThemeFailure implements ChangeThemeLocaleMessage {
   /// Nullable
   final error;
 
   const ChangeThemeFailure([this.error]);
+}
+
+class ChangeLocaleSuccess implements ChangeThemeLocaleMessage {
+  const ChangeLocaleSuccess();
+}
+
+class ChangeLocaleFailure implements ChangeThemeLocaleMessage {
+  /// Nullable
+  final error;
+
+  const ChangeLocaleFailure([this.error]);
 }
 
 ///
@@ -101,7 +112,7 @@ class ThemeLocaleBloc implements BaseBloc {
     ///
     /// Persist theme and locale to shared pref
     ///
-    Stream<ChangeThemeMessage> changeTheme(ThemeModel theme) async* {
+    changeTheme(ThemeModel theme) async* {
       try {
         final result = await rxSharedPrefs.setString(
           _themeKey,
@@ -119,17 +130,26 @@ class ThemeLocaleBloc implements BaseBloc {
 
     changeLocale(Locale locale) async* {
       try {
-        yield await rxSharedPrefs.setString(
+        final result = await rxSharedPrefs.setString(
           _localeKey,
           locale.languageCode,
         );
+        if (result) {
+          yield const ChangeLocaleSuccess();
+        } else {
+          yield const ChangeLocaleFailure();
+        }
       } catch (e) {
-        yield false;
+        yield ChangeLocaleFailure(e);
       }
     }
 
-    final message$ =
-        changeThemeSubject.distinct().switchMap(changeTheme).publish();
+    final message$ = Observable.merge(
+      [
+        changeThemeSubject.distinct().switchMap(changeTheme),
+        changeLocaleSubject.distinct().switchMap(changeLocale),
+      ],
+    ).publish();
 
     ///
     /// Stream subscriptions
@@ -141,13 +161,9 @@ class ThemeLocaleBloc implements BaseBloc {
       message$.listen((message) => print('[THEME_BLOC] message=$message')),
       themeAndLocale$.listen(
         (tuple) => print(
-          '[THEME_BLOC] theme=${tuple.item1.themeId}, locale=${tuple.item2}',
-        ),
+              '[THEME_BLOC] theme=${tuple.item1.themeId}, locale=${tuple.item2}',
+            ),
       ),
-      changeLocaleSubject
-          .distinct()
-          .switchMap(changeLocale)
-          .listen((result) => print('[THEME_BLOC] change locale=$result')),
 
       ///
       /// Connect [ConnectableObservable]
