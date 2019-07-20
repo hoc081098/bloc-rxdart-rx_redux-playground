@@ -1,15 +1,17 @@
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:simple_todo/data/todo_dao/todo_dao.dart';
 import 'package:simple_todo/data/todo_dao/todo_dao_impl.dart';
 import 'package:simple_todo/data/todo_entity/todo_entity.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqlbrite/sqlbrite.dart';
 
 class AppDb {
-  static Future<Database> _dbFuture = _open();
-  final TodoDaoImpl todoDao;
+  static final Future<Database> _dbFuture = _open();
 
-  AppDb() : this.todoDao = TodoDaoImpl(_dbFuture.then((db) => BriteDatabase(db)));
+  /// TodoDao
+  final TodoDao todoDao =
+      TodoDaoImpl(_dbFuture.then((db) => BriteDatabase(db)));
 
   static Future<Database> _open() async {
     final dir = await getApplicationDocumentsDirectory();

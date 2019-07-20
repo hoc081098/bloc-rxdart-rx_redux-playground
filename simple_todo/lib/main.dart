@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
 import 'package:simple_todo/data/app_db.dart';
 import 'package:simple_todo/data/mapper.dart';
+import 'package:simple_todo/data/todo_dao/todo_dao.dart';
 import 'package:simple_todo/data/todo_repo_impl.dart';
 import 'package:flutter_provider/flutter_provider.dart';
 import 'package:simple_todo/ui/home/home_bloc.dart';
@@ -10,9 +11,9 @@ import 'package:simple_todo/ui/home/home_page.dart';
 import 'domain/todo_repo.dart';
 
 void main() {
-  final appDb = AppDb();
-  final todoDao = appDb.todoDao;
-  final mappers = Mappers();
+  final AppDb appDb = AppDb();
+  final TodoDao todoDao = appDb.todoDao;
+  final Mappers mappers = Mappers();
 
   final TodoRepo todoRepo = TodoRepoImpl(
     todoDao,
@@ -33,10 +34,8 @@ class MyApp extends StatelessWidget {
     final homeBloc = HomeBloc(Provider.of<TodoRepo>(context));
 
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      title: 'Flutter Simple Todo',
+      theme: ThemeData.dark(),
       home: BlocProvider<HomeBloc>(
         child: MyHomePage(),
         initBloc: () => homeBloc,
