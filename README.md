@@ -1,6 +1,6 @@
 # bloc_rxdart_playground
 
-## [fetch_json_bloc_rxdart](./fetch_json_bloc_rxdart)
+## 1. [fetch_json_bloc_rxdart](./fetch_json_bloc_rxdart)
 
 Http + BLoC + RxDart
 
@@ -8,7 +8,7 @@ Http + BLoC + RxDart
 
 <p align="center"> <img src="./fetch_json_bloc_rxdart/Screenshot.png" width="480" /> </p>
 
-## [Flutter change theme](./flutter_change_theme)
+## 2. [Flutter change theme](./flutter_change_theme)
 
 BLoC + RxDart + RxSharedPrefs
 
@@ -16,7 +16,7 @@ BLoC + RxDart + RxSharedPrefs
 
 <p align="center"> <img src="./flutter_change_theme/Screenshot.gif" width="480" /> </p>
 
-## [simple_todo](./simple_todo)
+## 3. [simple_todo](./simple_todo)
 
  BLoC + RxDart + SQLite
 
