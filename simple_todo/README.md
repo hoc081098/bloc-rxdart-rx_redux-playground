@@ -1,6 +1,12 @@
 # simple_todo
 
-A new Flutter project.
+[Video 1](https://youtu.be/EUy9Sa8e5-o)
+
+[Video 2](https://youtu.be/AJAJyxdbREs)
+
+![Screenshot](./Screenshot.gif)
+
+![Screenshot](./Screenshot.png)
 
 ## Getting Started
 

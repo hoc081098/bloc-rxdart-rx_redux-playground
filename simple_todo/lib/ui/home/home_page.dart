@@ -1,8 +1,11 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
+import 'package:flutter_provider/flutter_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:simple_todo/domain/todo.dart';
+import 'package:simple_todo/domain/todo_repo.dart';
+import 'package:simple_todo/ui/add/add_bloc.dart';
 import 'package:simple_todo/ui/add/add_new.dart';
 import 'package:simple_todo/ui/home/home_bloc.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +23,49 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Simple todo'),
-        actions: <Widget>[],
+        actions: <Widget>[
+          StreamBuilder<Filter>(
+              stream: homeBloc.filter$,
+              initialData: homeBloc.filter$.value,
+              builder: (context, snapshot) {
+                final filter = snapshot.data;
+
+                return PopupMenuButton<Filter>(
+                  offset: Offset(0, 100),
+                  initialValue: filter,
+                  tooltip: 'Filter',
+                  onSelected: homeBloc.changeFilter,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Center(
+                          child: Text(
+                            titleFor(filter: filter),
+                            style: Theme.of(context).textTheme.subtitle,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_drop_down),
+                      ],
+                    ),
+                  ),
+                  itemBuilder: (BuildContext context) {
+                    return Filter.values.map((v) {
+                      return PopupMenuItem<Filter>(
+                        child: Text(
+                          titleFor(filter: v),
+                        ),
+                        value: v,
+                      );
+                    }).toList();
+                  },
+                );
+              }),
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -38,17 +83,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
 
                   final todos = snapshot.data;
-                  return ListView.builder(
+                  return ListView.separated(
                     itemCount: todos.length,
+                    physics: const BouncingScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
                       return TodoItem(todos[index]);
                     },
+                    separatorBuilder: (_, __) => Divider(),
                   );
                 },
               ),
             ),
           ),
-          AddNewTodoWidget()
+          BlocProvider<AddBloc>(
+            child: AddNewTodoWidget(),
+            initBloc: () => AddBloc(Provider.of<TodoRepo>(context)),
+          )
         ],
       ),
     );

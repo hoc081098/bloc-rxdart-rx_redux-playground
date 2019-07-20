@@ -13,6 +13,17 @@ import 'package:tuple/tuple.dart';
 
 enum Filter { onlyCompleted, onlyIncomplete, all }
 
+titleFor({@required Filter filter}) {
+  switch (filter) {
+    case Filter.onlyCompleted:
+      return 'Only completed';
+    case Filter.onlyIncomplete:
+      return 'Only incomplete';
+    case Filter.all:
+      return 'All';
+  }
+}
+
 class HomeBloc implements BaseBloc {
   ///
   /// Output streams
@@ -52,8 +63,8 @@ class HomeBloc implements BaseBloc {
     /// Output state stream
     final todos$ = publishValueSeededDistinct(
       Observable.combineLatest2(
-        todoRepo.allTodo(),
-        filterSubject,
+        todoRepo.allTodo().distinct(),
+        filterSubject.distinct(),
         (BuiltList<Todo> todos, Filter filter) {
           switch (filter) {
             case Filter.onlyCompleted:

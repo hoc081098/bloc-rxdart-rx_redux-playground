@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Simple Todo',
       theme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
       home: BlocProvider<HomeBloc>(
         child: MyHomePage(),
         initBloc: () => homeBloc,
