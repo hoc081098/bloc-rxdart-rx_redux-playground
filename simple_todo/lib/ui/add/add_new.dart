@@ -39,7 +39,7 @@ class _AddNewTodoWidgetState extends State<AddNewTodoWidget> {
         );
 
     final bloc = BlocProvider.of<AddBloc>(context);
-    _subscription = bloc.message$.listen((message) {
+    _subscription ??= bloc.message$.listen((message) {
       if (message is AddSuccess) {
         showSnackBar('Added successfully');
 
