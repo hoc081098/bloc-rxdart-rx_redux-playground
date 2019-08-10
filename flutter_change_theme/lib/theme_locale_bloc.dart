@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:disposebag/disposebag.dart';
 import 'package:distinct_value_connectable_observable/distinct_value_connectable_observable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
 import 'package:flutter_change_theme/theme_model.dart';
 import 'package:flutter_change_theme/theme_locale_provider.dart';
 import 'package:meta/meta.dart';
-import 'package:rx_shared_preference/rx_shared_preference.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
@@ -78,15 +79,12 @@ class ThemeLocaleBloc implements BaseBloc {
     RxSharedPreferences rxSharedPrefs,
   ) {
     // ignore_for_file: close_sinks
-    ///
-    /// Subjects
-    ///
+    
+    // Subjects
     final changeThemeSubject = PublishSubject<ThemeModel>();
     final changeLocaleSubject = PublishSubject<Locale>();
 
-    ///
-    /// Combine stream
-    ///
+    // Combine stream
     final Observable<ThemeModel> theme$ =
         rxSharedPrefs.getStringObservable(_themeKey).map(
       (title) {
@@ -111,11 +109,11 @@ class ThemeLocaleBloc implements BaseBloc {
       ),
     );
 
-    ///
-    /// Persist theme and locale to shared pref
-    ///
+    //
+    // Persist theme and locale to shared pref
+    //
 
-    /// Using stream generator (async*)
+    // Using stream generator (async*)
     changeTheme(ThemeModel theme) async* {
       try {
         final result = await rxSharedPrefs.setString(
@@ -132,7 +130,7 @@ class ThemeLocaleBloc implements BaseBloc {
       }
     }
 
-    /// Using RxDart
+    // Using RxDart
     changeLocale(Locale locale) {
       return Observable.defer(() => Stream.fromFuture(
                 rxSharedPrefs.setString(
@@ -153,35 +151,25 @@ class ThemeLocaleBloc implements BaseBloc {
       ],
     ).publish();
 
-    ///
-    /// Stream subscriptions
-    ///
-    final subscriptions = [
-      ///
-      /// Listen streams
-      ///
+    // Dispose bag
+    final bag = DisposeBag([
+      //Listen streams
       message$.listen((message) => print('[THEME_BLOC] message=$message')),
       themeAndLocale$.listen(
         (tuple) => print(
           '[THEME_BLOC] theme=${tuple.item1.themeId}, locale=${tuple.item2}',
         ),
       ),
-
-      ///
-      /// Connect [ConnectableObservable]
-      ///
+      // Connect [ConnectableObservable]
       message$.connect(),
       themeAndLocale$.connect(),
-    ];
+      // Controllers
+      changeThemeSubject,
+      changeLocaleSubject,
+    ]);
 
     return ThemeLocaleBloc._(
-      () async {
-        await Future.wait(subscriptions.map((s) => s.cancel()));
-        await Future.wait([
-          changeLocaleSubject,
-          changeThemeSubject,
-        ].map((c) => c.close()));
-      },
+      bag.dispose,
       changeLocale: changeLocaleSubject.add,
       changeTheme: changeThemeSubject.add,
       themeAndLocale$: themeAndLocale$,

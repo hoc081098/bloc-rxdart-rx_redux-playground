@@ -9,7 +9,7 @@ import 'package:flutter_change_theme/theme_locale_bloc.dart';
 import 'package:flutter_change_theme/theme_model.dart';
 import 'package:flutter_change_theme/theme_locale_provider.dart';
 import 'package:flutter_provider/flutter_provider.dart';
-import 'package:rx_shared_preference/rx_shared_preference.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -38,9 +38,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<ThemeLocaleBloc>(context);
 
-    return StreamBuilder<Tuple2<ThemeModel, Locale>>(
+    return RxStreamBuilder<Tuple2<ThemeModel, Locale>>(
       stream: bloc.themeAndLocale$,
-      initialData: bloc.themeAndLocale$.value,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container(
@@ -138,9 +137,8 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Home page'),
       ),
-      body: StreamBuilder<Tuple2<ThemeModel, Locale>>(
+      body: RxStreamBuilder<Tuple2<ThemeModel, Locale>>(
         stream: bloc.themeAndLocale$,
-        initialData: bloc.themeAndLocale$.value,
         builder: (context, snapshot) {
           final data = snapshot.data;
           final theme = data.item1;
@@ -155,16 +153,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 margin: const EdgeInsets.all(8),
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Theme.of(context).canvasColor,
-                    boxShadow: [
-                      BoxShadow(
-                        offset: Offset(0, 8),
-                        blurRadius: 16,
-                        spreadRadius: 0,
-                        color: Theme.of(context).backgroundColor,
-                      )
-                    ]),
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).canvasColor,
+                  boxShadow: [
+                    BoxShadow(
+                      offset: Offset(0, 8),
+                      blurRadius: 16,
+                      spreadRadius: 0,
+                      color: Theme.of(context).backgroundColor,
+                    )
+                  ],
+                ),
                 child: Column(
                   children: <Widget>[
                     Center(
@@ -185,16 +184,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 margin: const EdgeInsets.all(8),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Theme.of(context).canvasColor,
-                    boxShadow: [
-                      BoxShadow(
-                        offset: Offset(0, 8),
-                        blurRadius: 16,
-                        spreadRadius: 0,
-                        color: Theme.of(context).backgroundColor,
-                      )
-                    ]),
+                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).canvasColor,
+                  boxShadow: [
+                    BoxShadow(
+                      offset: Offset(0, 8),
+                      blurRadius: 16,
+                      spreadRadius: 0,
+                      color: Theme.of(context).backgroundColor,
+                    )
+                  ],
+                ),
                 child: Column(
                   children: <Widget>[
                     Text(
