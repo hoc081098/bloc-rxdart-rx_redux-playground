@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:disposebag/disposebag.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -101,22 +102,18 @@ class AddBloc implements BaseBloc {
       ],
     ).publish();
 
-    final subscriptions = <StreamSubscription>[
+    final bag = DisposeBag([
+      //subscriptions
       message$.listen((message) => print('[ADD_BLOC] message=$message')),
       message$.connect(),
-    ];
-    final subjects = <StreamController>{
+      // subjects
       titleSubject,
       dueDateSubject,
       submitSubject,
-    };
+    ]);
 
     return AddBloc._(
-      () async {
-        await Future.wait(subscriptions.map((s) => s.cancel()));
-        await Future.wait(subjects.map((s) => s.close()));
-        print('[ADD_BLOC] disposed');
-      },
+      () => bag.dispose().then((_) => print('[ADD_BLOC] disposed')),
       dueDateChanged: dueDateSubject.add,
       message$: message$,
       submitAdd: () => submitSubject.add(null),

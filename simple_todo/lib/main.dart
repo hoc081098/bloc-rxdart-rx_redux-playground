@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
     final homeBloc = HomeBloc(Provider.of<TodoRepo>(context));
 
     return MaterialApp(
-      title: 'Flutter Simple Todo',
+      title: 'Rx todo',
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
       home: BlocProvider<HomeBloc>(

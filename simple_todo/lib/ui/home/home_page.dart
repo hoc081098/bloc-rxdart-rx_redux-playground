@@ -24,9 +24,8 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Simple todo'),
         actions: <Widget>[
-          StreamBuilder<Filter>(
+          RxStreamBuilder<Filter>(
               stream: homeBloc.filter$,
-              initialData: homeBloc.filter$.value,
               builder: (context, snapshot) {
                 final filter = snapshot.data;
 
@@ -72,9 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: Container(
               constraints: BoxConstraints.expand(),
-              child: StreamBuilder<BuiltList<Todo>>(
+              child: RxStreamBuilder<BuiltList<Todo>>(
                 stream: homeBloc.todos$,
-                initialData: homeBloc.todos$.value,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return Center(

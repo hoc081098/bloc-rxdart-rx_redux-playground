@@ -155,13 +155,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.7"
+  disposebag:
+    dependency: "direct main"
+    description:
+      name: disposebag
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.9"
   distinct_value_connectable_observable:
     dependency: "direct main"
     description:
       name: distinct_value_connectable_observable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   fixnum:
     dependency: transitive
     description:
@@ -180,7 +187,7 @@ packages:
       name: flutter_bloc_pattern
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.1+1"
+    version: "1.0.1"
   flutter_provider:
     dependency: "direct main"
     description:
@@ -381,7 +388,7 @@ packages:
       name: rxdart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.22.0"
+    version: "0.22.1+1"
   shelf:
     dependency: transitive
     description:

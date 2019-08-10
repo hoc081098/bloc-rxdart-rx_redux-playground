@@ -21,10 +21,11 @@ dependencies:
     sdk: flutter
   intl: ^0.15.8
 
-  distinct_value_connectable_observable: ^2.0.1
+  distinct_value_connectable_observable: ^2.0.2
   sqlbrite: ^1.1.0
   flutter_provider: ^1.1.0+3
-  flutter_bloc_pattern: ^0.0.1+1
+  flutter_bloc_pattern: ^1.0.1
+  disposebag: ^0.0.9
 
   built_value: ^6.7.0
   path_provider: ^1.1.2
