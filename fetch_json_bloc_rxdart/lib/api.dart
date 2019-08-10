@@ -72,6 +72,8 @@ class Api {
       );
     }
 
+    await Future.delayed(const Duration(seconds: 1));
+
     final decoded = json.decode(response.body) as List;
     return decoded
         .cast<Map<String, dynamic>>()

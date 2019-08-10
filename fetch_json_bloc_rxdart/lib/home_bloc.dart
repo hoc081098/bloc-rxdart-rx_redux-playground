@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:disposebag/disposebag.dart';
 import 'package:fetch_json_bloc_rxdart/api.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
 import 'package:meta/meta.dart';
@@ -160,7 +161,7 @@ class HomeBloc implements BaseBloc {
             .map<PartialStateChange>((users) => GetUsersSuccessChange(users))
             .doOnError((e, s) => messageSubject.add(RefreshFailureMessage(e)))
             .doOnData((_) => messageSubject.add(const RefreshSuccessMessage()))
-            .onErrorResume((_) => Stream.empty())
+            .onErrorResumeNext(Stream.empty())
             .doOnDone(() => completer.complete());
       },
     );
@@ -177,22 +178,19 @@ class HomeBloc implements BaseBloc {
     ///
     /// Subscriptions & stream controllers
     ///
-    final subscriptions = <StreamSubscription>[
+    final bag = DisposeBag([
+      //subscriptions
       state$.listen((state) => print('[HOME_BLOC] state=$state')),
       messageSubject.listen((message) => print('[HOME_BLOC] message=$message')),
       state$.connect(),
-    ];
-    final controllers = <StreamController>{
+      //controllers
       fetchSubject,
       refreshSubject,
       messageSubject,
-    };
+    ]);
 
     return HomeBloc._(
-      () async {
-        await Future.wait(subscriptions.map((s) => s.cancel()));
-        await Future.wait(controllers.map((c) => c.close()));
-      },
+      bag.dispose,
       state$: state$,
       fetch: () => fetchSubject.add(null),
       refresh: () {

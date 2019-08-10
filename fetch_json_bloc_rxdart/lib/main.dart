@@ -87,29 +87,35 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Container(
         constraints: BoxConstraints.expand(),
-        child: StreamBuilder<HomeState>(
+        child: RxStreamBuilder<HomeState>(
           stream: bloc.state$,
-          initialData: bloc.state$.value,
           builder: (context, snapshot) {
-            final state = snapshot.data;
-            if (state.isLoading) {
-              return Center(
-                child: CircularProgressIndicator(),
+            final child = () {
+              final state = snapshot.data;
+              if (state.isLoading) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (state.error != null) {
+                return ErrorMessageWidget(
+                  error: state.error,
+                );
+              }
+              return RefreshIndicator(
+                child: ListView.builder(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  itemCount: state.users.length,
+                  itemBuilder: (context, index) =>
+                      ListItemWidget(user: state.users[index]),
+                ),
+                onRefresh: bloc.refresh,
               );
-            }
-            if (state.error != null) {
-              return ErrorMessageWidget(
-                error: state.error,
-              );
-            }
-            return RefreshIndicator(
-              child: ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: state.users.length,
-                itemBuilder: (context, index) =>
-                    ListItemWidget(user: state.users[index]),
-              ),
-              onRefresh: bloc.refresh,
+            }();
+
+            return AnimatedSwitcher(
+              duration: const Duration(seconds: 2),
+              child: child,
             );
           },
         ),
