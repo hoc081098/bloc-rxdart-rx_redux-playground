@@ -22,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Simple todo'),
+        title: Text('Rx todo'),
         actions: <Widget>[
           RxStreamBuilder<Filter>(
               stream: homeBloc.filter$,
