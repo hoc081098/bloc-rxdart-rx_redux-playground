@@ -6,7 +6,11 @@ Http + BLoC + RxDart
 
 [Video](https://youtu.be/SLVujaxMuwM)
 
-<p align="center"> <img src="./fetch_json_bloc_rxdart/Screenshot.png" width="480" /> </p>
+
+
+|   |  |
+| ------------- | ------------- |
+| ![Image screenshot](./fetch_json_bloc_rxdart/Screenshot.png)  | ![Image screenshot](./fetch_json_bloc_rxdart/demo.gif)  |
 
 ## 2. [Flutter change theme](./flutter_change_theme)
 
