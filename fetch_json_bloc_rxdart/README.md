@@ -4,7 +4,11 @@
 
 [Video](https://youtu.be/SLVujaxMuwM)
 
-![Image screenshot](./Screenshot.png)
+
+
+|   |  |
+| ------------- | ------------- |
+| ![Image screenshot](./Screenshot.png)  | ![Image screenshot](./demo.gif)  |
 
 ## Getting Started
 
