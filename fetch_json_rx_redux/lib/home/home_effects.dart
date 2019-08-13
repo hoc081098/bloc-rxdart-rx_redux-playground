@@ -1,5 +1,5 @@
 import 'package:fetch_json_rx_redux/api.dart';
-import 'package:fetch_json_rx_redux/home_state_action.dart';
+import 'package:fetch_json_rx_redux/home/home_state_action.dart';
 import 'package:rx_redux/rx_redux.dart';
 import 'package:rxdart/rxdart.dart';
 

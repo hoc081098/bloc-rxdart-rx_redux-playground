@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:disposebag/disposebag.dart';
-import 'package:fetch_json_rx_redux/home_effects.dart';
-import 'package:fetch_json_rx_redux/home_state_action.dart';
+import 'package:distinct_value_connectable_observable/distinct_value_connectable_observable.dart';
+import 'package:fetch_json_rx_redux/home/home_effects.dart';
+import 'package:fetch_json_rx_redux/home/home_state_action.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
 import 'package:meta/meta.dart';
 import 'package:rx_redux/rx_redux.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:distinct_value_connectable_observable/distinct_value_connectable_observable.dart';
 
 /// Home BLoC
 class HomeBloc implements BaseBloc {
@@ -55,7 +55,7 @@ class HomeBloc implements BaseBloc {
     /// Subscriptions & sinks
     final bag = DisposeBag([
       //subscriptions
-      state$.listen((state) => print('[HOME_BLOC] state=$state')),
+      stateDistinct$.listen((state) => print('[HOME_BLOC] state=$state')),
       effects.message$
           .listen((message) => print('[HOME_BLOC] message=$message')),
       stateDistinct$.connect(),
@@ -67,7 +67,7 @@ class HomeBloc implements BaseBloc {
     return HomeBloc._(
       bag.dispose,
       state$: stateDistinct$,
-      fetch: () => actionS.add(null),
+      fetch: () => actionS.add(const FetchUsersAction()),
       refresh: () {
         final completer = Completer<void>();
         actionS.add(RefreshAction(completer));
