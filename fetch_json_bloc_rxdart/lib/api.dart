@@ -1,22 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 
 class User {
-  final int id;
+  final String id;
   final String email;
   final String firstName;
   final String lastName;
   final String avatar;
 
   User({
-    @required this.id,
-    @required this.email,
-    @required this.firstName,
-    @required this.lastName,
-    @required this.avatar,
+    required this.id,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.avatar,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -24,7 +23,7 @@ class User {
       avatar: json['avatar'],
       email: json['email'],
       firstName: json['first_name'],
-      id: json['id'],
+      id: json['_id'],
       lastName: json['last_name'],
     );
   }
@@ -55,8 +54,8 @@ class User {
 }
 
 class Api {
-  static const url =
-      'https://hoc081098.github.io/hoc081098.github.io/users.json';
+  static final url =
+      Uri.parse('https://mvi-coroutines-flow-server.herokuapp.com/users');
 
   final http.Client _client;
 
@@ -68,7 +67,7 @@ class Api {
     if (response.statusCode != HttpStatus.ok) {
       throw HttpException(
         'Get user not successfully, status code: ${response.statusCode}',
-        uri: Uri.parse(url),
+        uri: url,
       );
     }
 
@@ -78,6 +77,6 @@ class Api {
     return decoded
         .cast<Map<String, dynamic>>()
         .map((json) => User.fromJson(json))
-        .toList();
+        .toList(growable: false);
   }
 }

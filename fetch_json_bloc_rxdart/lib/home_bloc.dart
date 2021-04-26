@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:disposebag/disposebag.dart';
+import 'package:distinct_value_connectable_stream/distinct_value_connectable_stream.dart';
 import 'package:fetch_json_bloc_rxdart/api.dart';
 import 'package:flutter_bloc_pattern/flutter_bloc_pattern.dart';
-import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:distinct_value_connectable_observable/distinct_value_connectable_observable.dart';
 import 'package:collection/collection.dart';
 
 ///
@@ -14,12 +13,12 @@ import 'package:collection/collection.dart';
 class HomeState {
   final bool isLoading;
   final List<User> users;
-  final error;
+  final Object? error;
 
   const HomeState({
-    @required this.isLoading,
-    @required this.users,
-    @required this.error,
+    required this.isLoading,
+    required this.users,
+    required this.error,
   });
 
   factory HomeState.initial() => const HomeState(
@@ -28,7 +27,7 @@ class HomeState {
         error: null,
       );
 
-  HomeState copyWith({bool isLoading, List<User> users, error}) {
+  HomeState copyWith({bool? isLoading, List<User>? users, Object? error}) {
     return HomeState(
       error: error,
       isLoading: isLoading ?? this.isLoading,
@@ -102,11 +101,11 @@ class GetUsersErrorMessage implements HomeMessage {
 ///
 /// Home BLoC
 ///
-class HomeBloc implements BaseBloc {
+class HomeBloc extends DisposeCallbackBaseBloc {
   ///
   /// Output
   ///
-  final ValueObservable<HomeState> state$;
+  final DistinctValueStream<HomeState> state$;
   final Stream<HomeMessage> message$;
 
   ///
@@ -115,21 +114,13 @@ class HomeBloc implements BaseBloc {
   final void Function() fetch;
   final Future<void> Function() refresh;
 
-  ///
-  /// Dispose
-  ///
-  final void Function() _dispose;
-
-  @override
-  void dispose() => _dispose();
-
-  HomeBloc._(
-    this._dispose, {
-    @required this.state$,
-    @required this.fetch,
-    @required this.refresh,
-    @required this.message$,
-  });
+  HomeBloc._({
+    required void Function() dispose,
+    required this.state$,
+    required this.fetch,
+    required this.refresh,
+    required this.message$,
+  }) : super(dispose);
 
   factory HomeBloc(Api api) {
     // ignore_for_file: close_sinks
@@ -146,7 +137,7 @@ class HomeBloc implements BaseBloc {
     ///
     final fetchChanges = fetchSubject.exhaustMap(
       (_) {
-        return Observable.defer(() => Stream.fromFuture(api.getUsers()))
+        return Rx.fromCallable(() => api.getUsers())
             .map<PartialStateChange>((users) => GetUsersSuccessChange(users))
             .startWith(const LoadingChange())
             .doOnError((e, s) => messageSubject.add(GetUsersErrorMessage(e)))
@@ -157,7 +148,7 @@ class HomeBloc implements BaseBloc {
         .throttleTime(const Duration(milliseconds: 600))
         .exhaustMap(
       (completer) {
-        return Observable.defer(() => Observable.fromFuture(api.getUsers()))
+        return Rx.fromCallable(() => api.getUsers())
             .map<PartialStateChange>((users) => GetUsersSuccessChange(users))
             .doOnError((e, s) => messageSubject.add(RefreshFailureMessage(e)))
             .doOnData((_) => messageSubject.add(const RefreshSuccessMessage()))
@@ -165,15 +156,9 @@ class HomeBloc implements BaseBloc {
             .doOnDone(() => completer.complete());
       },
     );
-    final state$ = publishValueSeededDistinct(
-      Observable.merge(
-        [
-          fetchChanges,
-          refreshChanges,
-        ],
-      ).scan(_reduce, HomeState.initial()),
-      seedValue: HomeState.initial(),
-    );
+    final state$ = Rx.merge([fetchChanges, refreshChanges])
+        .scan(_reduce, HomeState.initial())
+        .publishValueDistinct(HomeState.initial());
 
     ///
     /// Subscriptions & stream controllers
@@ -190,11 +175,11 @@ class HomeBloc implements BaseBloc {
     ]);
 
     return HomeBloc._(
-      bag.dispose,
+      dispose: bag.dispose,
       state$: state$,
       fetch: () => fetchSubject.add(null),
       refresh: () {
-        final completer = Completer<void>();
+        final completer = Completer<void>.sync();
         refreshSubject.add(completer);
         return completer.future;
       },
@@ -206,10 +191,12 @@ class HomeBloc implements BaseBloc {
   /// Reduce
   ///
   static HomeState _reduce(
-    HomeState state,
+    HomeState? state,
     PartialStateChange change,
     int _,
   ) {
+    state!;
+
     if (change is LoadingChange) {
       return state.copyWith(isLoading: true);
     }

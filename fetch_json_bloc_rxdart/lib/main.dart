@@ -15,8 +15,8 @@ void main() {
 
   runApp(
     BlocProvider<HomeBloc>(
+      initBloc: (context) => homeBloc,
       child: MyApp(),
-      initBloc: () => homeBloc,
     ),
   );
 }
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key}) : super(key: key);
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -41,10 +41,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  StreamSubscription<HomeMessage> _subscription;
 
-  _showSnackBar(String msg) {
-    _scaffoldKey.currentState.showSnackBar(
+  // ignore: cancel_subscriptions
+  StreamSubscription<HomeMessage>? _subscription;
+
+  void _showSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
         duration: const Duration(seconds: 2),
@@ -72,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription!.cancel();
     super.dispose();
   }
 
@@ -89,9 +91,10 @@ class _MyHomePageState extends State<MyHomePage> {
         constraints: BoxConstraints.expand(),
         child: RxStreamBuilder<HomeState>(
           stream: bloc.state$,
-          builder: (context, snapshot) {
+          builder: (context, state) {
+            state!;
+
             final child = () {
-              final state = snapshot.data;
               if (state.isLoading) {
                 return Center(
                   child: CircularProgressIndicator(),
@@ -126,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class ErrorMessageWidget extends StatelessWidget {
   const ErrorMessageWidget({
-    Key key,
+    Key? key,
     @required this.error,
   })  : assert(error != null),
         super(key: key);
@@ -158,15 +161,18 @@ class ErrorMessageWidget extends StatelessWidget {
               'Error: $message',
               maxLines: 2,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.title.copyWith(fontSize: 18),
+              style:
+                  Theme.of(context).textTheme.headline6!.copyWith(fontSize: 18),
             ),
             SizedBox(height: 16),
-            RaisedButton(
-              elevation: 12,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                elevation: 12,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(24),
               ),
-              padding: const EdgeInsets.all(24),
               child: Text('Retry get users'),
               onPressed: bloc.fetch,
             ),
@@ -179,8 +185,8 @@ class ErrorMessageWidget extends StatelessWidget {
 
 class ListItemWidget extends StatelessWidget {
   const ListItemWidget({
-    Key key,
-    @required this.user,
+    Key? key,
+    required this.user,
   }) : super(key: key);
 
   final User user;
@@ -217,6 +223,15 @@ class ListItemWidget extends StatelessWidget {
                 width: 64,
                 height: 64,
                 fit: BoxFit.cover,
+                errorBuilder: (context, e, s) {
+                  return Container(
+                    width: 64,
+                    height: 64,
+                    child: Center(
+                      child: Text('Error'),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -230,7 +245,7 @@ class ListItemWidget extends StatelessWidget {
                 Text(
                   '${user.firstName} ${user.lastName}',
                   textAlign: TextAlign.left,
-                  style: Theme.of(context).textTheme.title,
+                  style: Theme.of(context).textTheme.headline6,
                 ),
                 SizedBox(
                   height: 8,
@@ -238,7 +253,7 @@ class ListItemWidget extends StatelessWidget {
                 Text(
                   user.email,
                   textAlign: TextAlign.left,
-                  style: Theme.of(context).textTheme.subtitle,
+                  style: Theme.of(context).textTheme.subtitle2,
                 ),
               ],
             ),
