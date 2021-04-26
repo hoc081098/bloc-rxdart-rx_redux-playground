@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/simple_todo/build" />
+      <excludeFolder url="file://$MODULE_DIR$/simple_todo/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fetch_json_bloc_rxdart/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fetch_json_bloc_rxdart/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fetch_json_rx_redux/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fetch_json_rx_redux/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/flutter_change_theme/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/flutter_change_theme/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

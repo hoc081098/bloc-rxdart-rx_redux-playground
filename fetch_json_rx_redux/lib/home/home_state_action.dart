@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:fetch_json_rx_redux/api.dart';
-import 'package:meta/meta.dart';
 
 ///
 /// Home state
@@ -10,12 +9,12 @@ import 'package:meta/meta.dart';
 class HomeState {
   final bool isLoading;
   final List<User> users;
-  final error;
+  final Object? error;
 
   const HomeState({
-    @required this.isLoading,
-    @required this.users,
-    @required this.error,
+    required this.isLoading,
+    required this.users,
+    required this.error,
   });
 
   factory HomeState.initial() => const HomeState(
@@ -24,7 +23,7 @@ class HomeState {
         error: null,
       );
 
-  HomeState copyWith({bool isLoading, List<User> users, error}) {
+  HomeState copyWith({bool? isLoading, List<User>? users, Object? error}) {
     return HomeState(
       error: error,
       isLoading: isLoading ?? this.isLoading,
@@ -47,7 +46,6 @@ class HomeState {
   bool operator ==(other) {
     return identical(this, other) ||
         other is HomeState &&
-            other.runtimeType == this.runtimeType &&
             other.isLoading == this.isLoading &&
             const ListEquality<User>().equals(other.users, this.users) &&
             other.error == this.error;
@@ -79,8 +77,9 @@ class RefreshAction implements HomeAction {
 
 class GetUsersSuccessChange implements HomeAction {
   final List<User> users;
+  final bool refresh;
 
-  GetUsersSuccessChange(this.users);
+  GetUsersSuccessChange(this.users, this.refresh);
 
   @override
   HomeState reduce(HomeState state) {
@@ -100,17 +99,14 @@ class LoadingChange implements HomeAction {
 }
 
 class GetUsersErrorChange implements HomeAction {
-  final error;
+  final Object error;
+  final bool refresh;
 
-  const GetUsersErrorChange(this.error);
+  const GetUsersErrorChange(this.error, this.refresh);
 
   @override
-  HomeState reduce(HomeState state) {
-    return state.copyWith(
-      isLoading: false,
-      error: error,
-    );
-  }
+  HomeState reduce(HomeState state) =>
+      refresh ? state : state.copyWith(isLoading: false, error: error);
 }
 
 ///
@@ -123,13 +119,13 @@ class RefreshSuccessMessage implements HomeMessage {
 }
 
 class RefreshFailureMessage implements HomeMessage {
-  final error;
+  final Object error;
 
   const RefreshFailureMessage(this.error);
 }
 
 class GetUsersErrorMessage implements HomeMessage {
-  final error;
+  final Object error;
 
   GetUsersErrorMessage(this.error);
 }

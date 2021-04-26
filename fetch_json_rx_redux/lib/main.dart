@@ -14,8 +14,8 @@ void main() {
 
   runApp(
     BlocProvider<HomeBloc>(
+      initBloc: (context) => homeBloc,
       child: MyApp(),
-      initBloc: () => homeBloc,
     ),
   );
 }
